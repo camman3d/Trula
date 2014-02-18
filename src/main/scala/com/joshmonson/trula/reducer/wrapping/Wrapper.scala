@@ -31,6 +31,18 @@ class Wrapper(var id: Identifier) {
     fields.map(_.clear())
   }
 
+  def add(field: Wrapper) {
+    if (field.id.index.isDefined) {
+      val index = math.min(fields.size, field.id.index.get)
+      fields = fields.slice(0, index) ::: List(field) ::: fields.slice(index, fields.size)
+    } else
+      fields :::= List(field)
+  }
+
+  def remove(field: Wrapper) {
+    fields = fields.filterNot(_ == field)
+  }
+
 
 
   private def wrapFields(_class: Class[_]): List[Wrapper] = {
@@ -79,6 +91,10 @@ class Wrapper(var id: Identifier) {
 
   private def wrapFields() {
     fields = wrapFields(obj.get.getClass)
+    updateIndices()
+  }
+
+  def updateIndices() {
     for (i <- 0 until fields.size)
       fields(i).id = fields(i).id.copy(index = Some(i))
   }

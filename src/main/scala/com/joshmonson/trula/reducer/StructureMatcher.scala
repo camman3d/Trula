@@ -57,7 +57,4 @@ object StructureMatcher {
     } else
       false
   }
-
-
-
 }
