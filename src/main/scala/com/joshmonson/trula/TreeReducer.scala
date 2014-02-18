@@ -1,12 +1,12 @@
-package ast
+package com.joshmonson.trula
 
 /**
  * Created with IntelliJ IDEA.
  * User: josh
- * Date: 2/15/14
- * Time: 7:13 AM
+ * Date: 2/17/14
+ * Time: 7:15 AM
  * To change this template use File | Settings | File Templates.
  */
-class Structure(id: Identifier, children: List[Structure]) {
+class TreeReducer {
 
 }
