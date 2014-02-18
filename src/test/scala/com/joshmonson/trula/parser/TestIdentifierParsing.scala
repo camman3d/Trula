@@ -76,7 +76,7 @@ class TestIdentifierParsing {
     val result = RuleParser.parseRule(RuleParser.id, "A > B")
     assertTrue(result.get.kind.get == "B")
     assertTrue(result.get.parentage.get.id.kind.get == "A")
-    assertTrue(result.get.parentage.get.parent)
+    assertTrue(result.get.parentage.get.isParent)
   }
 
   @Test
@@ -84,7 +84,7 @@ class TestIdentifierParsing {
     val result = RuleParser.parseRule(RuleParser.id, "A >> B")
     assertTrue(result.get.kind.get == "B")
     assertTrue(result.get.parentage.get.id.kind.get == "A")
-    assertFalse(result.get.parentage.get.parent)
+    assertFalse(result.get.parentage.get.isParent)
   }
 
   @Test
@@ -92,9 +92,9 @@ class TestIdentifierParsing {
     val result = RuleParser.parseRule(RuleParser.id, "A > B >> C")
     assertTrue(result.get.kind.get == "C")
     assertTrue(result.get.parentage.get.id.kind.get == "B")
-    assertFalse(result.get.parentage.get.parent)
+    assertFalse(result.get.parentage.get.isParent)
     assertTrue(result.get.parentage.get.id.parentage.get.id.kind.get == "A")
-    assertTrue(result.get.parentage.get.id.parentage.get.parent)
+    assertTrue(result.get.parentage.get.id.parentage.get.isParent)
   }
 
   @Test

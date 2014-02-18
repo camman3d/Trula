@@ -1,12 +1,12 @@
-package com.joshmonson.trula
+package com.joshmonson.trula.reducer
 
 /**
  * Created with IntelliJ IDEA.
  * User: josh
- * Date: 2/17/14
- * Time: 7:15 AM
+ * Date: 2/18/14
+ * Time: 10:10 AM
  * To change this template use File | Settings | File Templates.
  */
-class TreeReducer {
+class InvalidSyntaxException extends Exception {
 
 }

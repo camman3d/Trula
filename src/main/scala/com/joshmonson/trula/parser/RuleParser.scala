@@ -54,11 +54,11 @@ object RuleParser extends RegexParsers {
   // Now add in ancestor identification
   val ancestor = basicId ~ ">>" ^^ {
     d =>
-      Parentage(d._1, parent = false)
+      Parentage(d._1, isParent = false)
   }
   val parent = basicId ~ ">" ^^ {
     d =>
-      Parentage(d._1, parent = true)
+      Parentage(d._1, isParent = true)
   }
   val history = rep(ancestor | parent) ^^ {
     d =>
