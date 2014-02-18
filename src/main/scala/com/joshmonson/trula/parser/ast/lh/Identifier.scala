@@ -1,6 +1,5 @@
 package com.joshmonson.trula.parser.ast.lh
 
-import com.joshmonson.trula.reducer.wrapping.Wrapper
 
 case class Identifier(
                        label: Option[String] = None,

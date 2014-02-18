@@ -62,4 +62,25 @@ class TestStructureMatcher {
     val structure = RuleParser.parse("A { B C } -> X").get(0).lh
     assertFalse(StructureMatcher.matches(a, structure))
   }
+
+  @Test
+  def testMatchesWildcard1() {
+    val a = Wrapper.wrap(new A(new B()))
+    val structure = RuleParser.parse("% { B } -> X").get(0).lh
+    assertTrue(StructureMatcher.matches(a, structure))
+  }
+
+  @Test
+  def testMatchesWildcard2() {
+    val a = Wrapper.wrap(new A(new B()))
+    val structure = RuleParser.parse("% { % } -> X").get(0).lh
+    assertTrue(StructureMatcher.matches(a, structure))
+  }
+
+  @Test
+  def testMatchesWildcard3() {
+    val a = Wrapper.wrap(new A(new B()))
+    val structure = RuleParser.parse("% { C } -> X").get(0).lh
+    assertFalse(StructureMatcher.matches(a, structure))
+  }
 }

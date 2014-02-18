@@ -46,7 +46,11 @@ object RuleParser extends RegexParsers {
     d =>
       Identifier(d._1._1._1, Some(d._1._1._2), Some(d._1._2), d._2)
   }
-  val basicId = not ~ (kindNameId | kindId | nameId) ^^ {
+  val wildcard = (label ?) ~ "%" ^^ {
+    d =>
+      Identifier(d._1)
+  }
+  val basicId = not ~ (kindNameId | kindId | nameId | wildcard) ^^ {
     d =>
       d._2.copy(not = d._1)
   }

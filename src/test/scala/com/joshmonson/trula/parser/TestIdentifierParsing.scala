@@ -98,6 +98,22 @@ class TestIdentifierParsing {
   }
 
   @Test
+  def testIdWildcard1() {
+    val result = RuleParser.parseRule(RuleParser.id, "%")
+    assertTrue(result.get.label.isEmpty)
+    assertTrue(result.get.kind.isEmpty)
+    assertTrue(result.get.name.isEmpty)
+  }
+
+  @Test
+  def testIdWildcard2() {
+    val result = RuleParser.parseRule(RuleParser.id, "@foo %")
+    assertEquals("foo", result.get.label.get)
+    assertTrue(result.get.kind.isEmpty)
+    assertTrue(result.get.name.isEmpty)
+  }
+
+  @Test
   def testRefKind() {
     val result = RuleParser.parseRule(RuleParser.ref, "A")
     assertTrue(result.get.kind.get == "A")
