@@ -1,8 +1,9 @@
-package com.joshmonson.trula.reducer
+package com.joshmonson.trula.reducer.core
 
 import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.parser.ast.lh.LHStructure
-import com.joshmonson.trula.reducer.StructureMatcher.matches
+import com.joshmonson.trula.reducer.core.StructureMatcher.matches
+
 
 /**
  * Created with IntelliJ IDEA.

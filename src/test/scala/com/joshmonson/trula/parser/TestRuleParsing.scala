@@ -2,7 +2,7 @@ package com.joshmonson.trula.parser
 
 import org.junit.Test
 import org.junit.Assert._
-import com.joshmonson.trula.parser.ast.rh.Assignment
+import com.joshmonson.trula.parser.ast.rh.{Deletion, Assignment}
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,6 +45,12 @@ class TestRuleParsing {
     assertEquals(result.get(0).rh.id.kind.get, "B")
     assertEquals(result.get(1).lh.id.kind.get, "C")
     assertEquals(result.get(1).rh.id.kind.get, "D")
+  }
+
+  @Test
+  def testDeletion() {
+    val result = RuleParser.parse("A -> ~")
+    assertTrue(result.get(0).rh.isInstanceOf[Deletion])
   }
 
 }

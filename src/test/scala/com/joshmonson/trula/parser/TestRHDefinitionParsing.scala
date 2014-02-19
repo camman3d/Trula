@@ -80,13 +80,6 @@ class TestRHDefinitionParsing {
   }
 
   @Test
-  def testDeletionAssignment() {
-    val result = RuleParser.parseRule(RuleParser.rhAssignment, ":foo = ~")
-    assertTrue(result.get.id.name.get == "foo")
-    assertTrue(result.get.target.isInstanceOf[Deletion])
-  }
-
-  @Test
   def testDefinitionStructure() {
     val result = RuleParser.parseRule(RuleParser.rhDef, "A { B C }")
     assertTrue(result.get.isInstanceOf[RHStructure])
@@ -98,21 +91,6 @@ class TestRHDefinitionParsing {
     val result = RuleParser.parseRule(RuleParser.rhDef, "A = B { C D }")
     assertTrue(result.get.isInstanceOf[Assignment])
     assertTrue(result.get.id.kind.get == "A")
-  }
-
-  @Test
-  def testDefinitionDeletion1() {
-    val result = RuleParser.parseRule(RuleParser.rhDef, "A = ~")
-    assertTrue(result.get.id.kind.get == "A")
-    assertTrue(result.get.asInstanceOf[Assignment].target.isInstanceOf[Deletion])
-  }
-
-  @Test
-  def testDefinitionDeletion2() {
-    val result = RuleParser.parseRule(RuleParser.rhDef, "@foo { :bar = ~ }")
-    assertTrue(result.get.id.label.get == "foo")
-    val child = result.get.asInstanceOf[RHStructure].children(0)
-    assertTrue(child.asInstanceOf[Assignment].target.isInstanceOf[Deletion])
   }
 
 }

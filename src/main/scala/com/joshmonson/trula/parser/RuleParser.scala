@@ -112,15 +112,15 @@ object RuleParser extends RegexParsers {
       Method(d._1._1._1, args)
   }
 
-  val rhDeletion = "~" ^^ {d => Deletion()}
-
-  def rhAssignment = ref ~ "=" ~ (rhDeletion | rhMethod | rhStructure) ^^ {
+  def rhAssignment = ref ~ "=" ~ (rhMethod | rhStructure) ^^ {
     d =>
       Assignment(d._1._1, d._2)
   }
 
+  val rhDeletion = "~" ^^ {d => Deletion()}
+
   // Rule definitions
-  val rule = lhStructureDef ~ "->" ~ rhDef ^^ {
+  val rule = lhStructureDef ~ "->" ~ (rhDef | rhDeletion) ^^ {
     d =>
       Rule(d._1._1, d._2)
   }

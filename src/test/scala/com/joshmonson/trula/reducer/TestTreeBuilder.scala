@@ -5,6 +5,7 @@ import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.support.{B, A}
 import com.joshmonson.trula.parser.RuleParser
 import org.junit.Assert._
+import com.joshmonson.trula.reducer.core.{TreeBuilder, SubTreeFinder}
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,6 +15,16 @@ import org.junit.Assert._
  * To change this template use File | Settings | File Templates.
  */
 class TestTreeBuilder {
+
+  @Test
+  def testDelete() {
+    val a = Wrapper.wrap(new A(new B()))
+    val rule = RuleParser.parse("B -> ~").get(0)
+    val store = SubTreeFinder.find(a, rule.lh)
+    val rebuilt = new TreeBuilder().build(rule.rh, store.get)
+    assertNull(rebuilt)
+    assertTrue(a.fields.isEmpty)
+  }
 
   @Test
   def testBuildStructure() {
@@ -41,7 +52,7 @@ class TestTreeBuilder {
     val rule = RuleParser.parse("A -> :c = foo(A)").get(0)
     val store = SubTreeFinder.find(a, rule.lh)
     val treeBuilder = new TreeBuilder
-    treeBuilder.add[A]("foo", a => a.b)
+    treeBuilder.add("foo", (a: A) => a.b)
     val rebuilt = treeBuilder.build(rule.rh, store.get)
     assertEquals("B", rebuilt.id.kind.get)
     assertEquals("c", rebuilt.id.name.get)

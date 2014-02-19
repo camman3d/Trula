@@ -43,6 +43,8 @@ class Wrapper(var id: Identifier) {
     fields = fields.filterNot(_ == field)
   }
 
+  def size: Int = 1 + fields.map(_.size).sum
+
 
 
   private def wrapFields(_class: Class[_]): List[Wrapper] = {

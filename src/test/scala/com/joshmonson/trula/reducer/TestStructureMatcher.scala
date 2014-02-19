@@ -6,6 +6,7 @@ import com.joshmonson.trula.parser.ast.lh.{Parentage, Identifier}
 import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.support.{B, A}
 import com.joshmonson.trula.parser.RuleParser
+import com.joshmonson.trula.reducer.core.StructureMatcher
 
 /**
  * Created with IntelliJ IDEA.

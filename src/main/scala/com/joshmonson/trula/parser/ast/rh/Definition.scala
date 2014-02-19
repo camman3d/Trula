@@ -1,6 +1,5 @@
 package com.joshmonson.trula.parser.ast.rh
 
-import com.joshmonson.trula.parser.ast.lh.Identifier
 
 /**
  * Created with IntelliJ IDEA.

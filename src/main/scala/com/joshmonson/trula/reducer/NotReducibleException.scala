@@ -1,12 +1,12 @@
-package com.joshmonson.trula.parser.ast.rh
+package com.joshmonson.trula.reducer
 
 /**
  * Created with IntelliJ IDEA.
  * User: josh
  * Date: 2/18/14
- * Time: 9:58 AM
+ * Time: 9:53 PM
  * To change this template use File | Settings | File Templates.
  */
-case class Deletion() extends Definition {
-  val id = new Reference()
+class NotReducibleException(msg: String) extends Exception(msg) {
+
 }

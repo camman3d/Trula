@@ -5,6 +5,7 @@ import org.junit.Assert._
 import com.joshmonson.trula.parser.RuleParser
 import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.support.{B, A}
+import com.joshmonson.trula.reducer.core.SubTreeFinder
 
 /**
  * Created with IntelliJ IDEA.

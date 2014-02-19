@@ -1,8 +1,11 @@
-package com.joshmonson.trula.reducer
+package com.joshmonson.trula.reducer.core
 
-import com.joshmonson.trula.parser.ast.rh.{Method, Assignment, RHStructure, Definition}
+import com.joshmonson.trula.parser.ast.rh._
 import com.joshmonson.trula.reducer.wrapping.Wrapper
 import scala.collection.mutable
+import com.joshmonson.trula.parser.ast.rh.RHStructure
+import com.joshmonson.trula.parser.ast.rh.Method
+import com.joshmonson.trula.parser.ast.rh.Assignment
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,7 +63,10 @@ class TreeBuilder {
     }
     case assignment: Assignment => {
       val value = assignment.target match {
-        case method: Method => build(method, store)
+        case method: Method => {
+          val args = method.args.map(arg => store.data.find(e => arg.references(e.id)).get.obj)
+          methods(method.name)(args)
+        }
         case structure: RHStructure => build(structure, store)
       }
 
@@ -71,11 +77,7 @@ class TreeBuilder {
         value.id = value.id.copy(kind = assignment.id.kind)
       value
     }
-  }
-
-  def build(method: Method, store: ObjectStore): Wrapper = {
-    val args = method.args.map(arg => store.data.find(e => arg.references(e.id)).get.obj)
-    methods(method.name)(args)
+    case _: Deletion => null
   }
 
 }

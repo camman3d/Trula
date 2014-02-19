@@ -1,6 +1,8 @@
 package com.joshmonson.trula.reducer
 
 import com.joshmonson.trula.parser.RuleParser
+import com.joshmonson.trula.reducer.wrapping.Wrapper
+import com.joshmonson.trula.reducer.core.{TreeBuilder, SubTreeFinder}
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,7 +22,57 @@ class TreeReducer(ruleText: String) {
       throw new InvalidSyntaxException()
   }
 
+  val treeBuilder = new TreeBuilder
 
+  def reduce(obj: Any): Wrapper = {
+    var tree = obj match {
+      case w: Wrapper => w
+      case a: Any => Wrapper.wrap(a)
+    }
 
+    var reduceCount = 0
+    var size = tree.size
+    var done = false
+    while (!done) {
+      done = true
+      tree.updateIndices()
 
+      // Try each rule
+      for (rule <- rules) {
+        if (done) {
+          val subTree = SubTreeFinder.find(tree, rule.lh)
+          if (subTree.isDefined) {
+
+            // Replace with changed structure
+            done = false
+            val reduced = treeBuilder.build(rule.rh, subTree.get)
+            if (reduced != null) {
+              if (subTree.get.parent.isDefined) {
+                reduced.id = reduced.id.copy(index = subTree.get.parent.get.id.index)
+                subTree.get.parent.get.add(reduced)
+              } else
+                tree = reduced
+            }
+          }
+        }
+      }
+
+      // Let's add a check to safeguard against non-reducibility
+      reduceCount += 1
+      if (reduceCount >= TreeReducer.reduceThreshold) {
+        val treeSize = tree.size
+        if (size < treeSize) {
+          reduceCount = 0
+          size = treeSize
+        } else
+          throw new NotReducibleException("Infinite loop while reducing.")
+      }
+    }
+    tree
+  }
+
+}
+
+object TreeReducer {
+  var reduceThreshold = 100
 }
