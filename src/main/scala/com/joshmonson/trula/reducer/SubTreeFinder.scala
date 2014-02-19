@@ -11,7 +11,7 @@ import com.joshmonson.trula.reducer.StructureMatcher.matches
  * Time: 1:59 PM
  * To change this template use File | Settings | File Templates.
  */
-object SubGraphFinder {
+object SubTreeFinder {
 
   def find(obj: Wrapper, structure: LHStructure, history: List[Wrapper] = Nil): Option[ObjectStore] = {
     if (matches(obj, structure, history)) {

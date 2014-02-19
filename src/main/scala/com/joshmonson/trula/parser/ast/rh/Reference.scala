@@ -1,5 +1,7 @@
 package com.joshmonson.trula.parser.ast.rh
 
+import com.joshmonson.trula.parser.ast.lh.Identifier
+
 /**
  * Created with IntelliJ IDEA.
  * User: josh
@@ -12,6 +14,15 @@ case class Reference(
                       kind: Option[String] = None,
                       name: Option[String] = None
                       ) {
+
+  def references(id: Identifier) = {
+    if (label.isDefined)
+      label == id.label
+    else
+      kind.map(_ == id.kind.getOrElse("")).getOrElse(true) && name.map(_ == id.name.getOrElse("")).getOrElse(true)
+  }
+
+  def toId = Identifier(label, kind, name)
 
   override def toString: String =
     label.map("@" + _ + " ").getOrElse("") +

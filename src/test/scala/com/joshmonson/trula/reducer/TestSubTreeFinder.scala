@@ -13,13 +13,13 @@ import com.joshmonson.trula.reducer.support.{B, A}
  * Time: 2:27 PM
  * To change this template use File | Settings | File Templates.
  */
-class TestSubGraphFinder {
+class TestSubTreeFinder {
 
   @Test
   def testFindSimple() {
     val a = Wrapper.wrap(new A(new B()))
     val structure = RuleParser.parse("A -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 1)
     assertEquals("A", store.get.data(0).id.kind.get)
   }
@@ -28,7 +28,7 @@ class TestSubGraphFinder {
   def testFindChild() {
     val a = Wrapper.wrap(new A(new B()))
     val structure = RuleParser.parse("B -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 1)
     assertEquals("B", store.get.data(0).id.kind.get)
   }
@@ -37,7 +37,7 @@ class TestSubGraphFinder {
   def testFindParentAndChild() {
     val a = Wrapper.wrap(new A(new B()))
     val structure = RuleParser.parse("A { B } -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 2)
     assertEquals("A", store.get.data(0).id.kind.get)
     assertEquals("B", store.get.data(1).id.kind.get)
@@ -53,7 +53,7 @@ class TestSubGraphFinder {
     a.fields = List(b1, b2, new Wrapper("D"))
     
     val structure = RuleParser.parse("B > D -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 1)
     assertEquals("D", store.get.data(0).id.kind.get)
     assertEquals(b2, store.get.data(0).parent.get)
@@ -69,7 +69,7 @@ class TestSubGraphFinder {
     a.fields = List(b1, b2, new Wrapper("D"))
 
     val structure = RuleParser.parse("C >> A -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 1)
     assertEquals("A", store.get.data(0).id.kind.get)
   }
@@ -84,7 +84,7 @@ class TestSubGraphFinder {
     a.fields = List(b1, b2, new Wrapper("D"))
 
     val structure = RuleParser.parse("A {[ D ]} -> X").get(0).lh
-    val store = SubGraphFinder.find(a, structure)
+    val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 2)
     assertEquals("A", store.get.data(0).id.kind.get)
     assertEquals("D", store.get.data(1).id.kind.get)

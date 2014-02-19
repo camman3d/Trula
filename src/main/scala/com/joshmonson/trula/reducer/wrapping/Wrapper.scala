@@ -103,5 +103,5 @@ class Wrapper(var id: Identifier) {
 
 object Wrapper {
   private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
-  def wrap(obj: Object) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
+  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
 }
