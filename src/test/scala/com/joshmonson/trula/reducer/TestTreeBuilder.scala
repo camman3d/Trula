@@ -29,11 +29,11 @@ class TestTreeBuilder {
   @Test
   def testBuildStructure() {
     val a = Wrapper.wrap(new A(new B()))
-    val rule = RuleParser.parse("A -> C").get(0)
+    val rule = RuleParser.parse("A { B } -> B { A }").get(0)
     val store = SubTreeFinder.find(a, rule.lh)
     val rebuilt = new TreeBuilder().build(rule.rh, store.get)
-    assertEquals("C", rebuilt.id.kind.get)
-    assertTrue(rebuilt.fields.isEmpty)
+    assertEquals("B", rebuilt.id.kind.get)
+    assertEquals(a, rebuilt.fields(0))
   }
 
   @Test
