@@ -129,7 +129,7 @@ object RuleParser extends RegexParsers {
 
   def parse(str: String): Option[List[Rule]] = parseRule(ruleList, str)
 
-  def parseRule[T](rule: RuleParser.Parser[T], str: String): Option[T] = parse(rule, str) match {
+  def parseRule[T](rule: RuleParser.Parser[T], str: String): Option[T] = parse(rule, str.trim) match {
     case Success(result, input) => {
       if (input.atEnd)
         Some(result)

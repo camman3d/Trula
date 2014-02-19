@@ -86,7 +86,9 @@ class Wrapper(var id: Identifier) {
       val declaredFields = if (_class.getDeclaredFields == null) Nil else _class.getDeclaredFields.toList
       declaredFields.map(field => {
         field.setAccessible(true)
-        new Wrapper(new Identifier(kind = field.getType.getSimpleName, name = field.getName), field.get(obj.get))
+        val fieldObj = field.get(obj.get)
+        val fieldKind = fieldObj.getClass.getSimpleName
+        new Wrapper(new Identifier(kind = fieldKind, name = field.getName), fieldObj)
       }) ::: wrapFields(_class.getSuperclass)
     }
   }

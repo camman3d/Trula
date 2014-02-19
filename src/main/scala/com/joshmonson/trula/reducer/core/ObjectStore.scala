@@ -27,7 +27,7 @@ class ObjectStore {
 
   def add(entry: StoreEntry) {
     data = data :+ entry
-    if (parent == null)
+    if (parent.isEmpty)
       parent = entry.parent
   }
 }
