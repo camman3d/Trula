@@ -16,6 +16,7 @@ import scala.runtime.BoxedUnit
 class Wrapper(var id: Identifier) {
   var obj: Option[Any] = None
   var fields: List[Wrapper] = Nil
+  var properties: Map[String, String] = Map()
   var used = false
 
   def this(id: Identifier, obj: Any) {
@@ -60,13 +61,26 @@ class Wrapper(var id: Identifier) {
 }
 
 object Wrapper {
-  private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
+//  private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
 
   def deriveKind(obj: Any) = {
     val name = obj.getClass.getSimpleName
     if (name == null)
       obj.getClass.getCanonicalName
     name
+  }
+
+  def isBasic(obj: Any) = obj match {
+    case o: String  => true
+    case o: Byte    => true
+    case o: Char    => true
+    case o: Short   => true
+    case o: Int     => true
+    case o: Long    => true
+    case o: Float   => true
+    case o: Double  => true
+    case o: Boolean => true
+    case _ => false
   }
   
   //  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
@@ -80,19 +94,12 @@ object Wrapper {
     case s: java.util.Set[_] => wrap(s.toSet, name)
 
     // Basic objects/primitives
-    case o: String  => wrapBasic(o, name)
-    case o: Byte    => wrapBasic(o, name)
-    case o: Char    => wrapBasic(o, name)
-    case o: Short   => wrapBasic(o, name)
-    case o: Int     => wrapBasic(o, name)
-    case o: Long    => wrapBasic(o, name)
-    case o: Float   => wrapBasic(o, name)
-    case o: Double  => wrapBasic(o, name)
-    case o: Boolean => wrapBasic(o, name)
+    case o if isBasic(o) => wrapBasic(o, name)
 
     // Other special things
-    case Unit           => new Wrapper(new Identifier(kind = "Unit"))
-    case BoxedUnit.UNIT => new Wrapper(new Identifier(kind = "Unit"))
+    case Unit             => new Wrapper(new Identifier(kind = "Unit"))
+    case BoxedUnit.UNIT   => new Wrapper(new Identifier(kind = "Unit"))
+    case n if n == null   => new Wrapper(new Identifier(kind = "null"))
 
     // General object
     case _ => wrapObj(obj, name)
@@ -112,16 +119,12 @@ object Wrapper {
 
   private def wrapObj(obj: Any, name: Option[String]): Wrapper = {
 
-    // Check for null
-    if (obj == null)
-      return new Wrapper(new Identifier(kind = "null"))
-
     // Wrap the object
     val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
     val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
 
     // Wrap the fields
-    def wrapFields(_class: Class[_]): List[Wrapper] = {
+    def wrapFields(_class: Class[_]): List[Either[(String, String), Wrapper]] = {
       if (_class == classOf[Object] || _class == classOf[Any] || _class == classOf[AnyRef])
         Nil
       else {
@@ -129,11 +132,16 @@ object Wrapper {
         fields.map(f => {
           f.setAccessible(true)
           val fieldObj = f.get(obj)
-          wrap(fieldObj, Some(f.getName))
+          if (isBasic(fieldObj))
+            Left(f.getName -> fieldObj.toString)
+          else
+            Right(wrap(fieldObj, Some(f.getName)))
         }) ++ wrapFields(_class.getSuperclass)
       }
     }
-    wrapper.fields = wrapFields(obj.getClass)
+    val wrappedFields = wrapFields(obj.getClass)
+    wrapper.fields = wrappedFields.filter(_.isRight).map(_.right.get)
+    wrapper.properties = wrappedFields.filter(_.isLeft).map(_.left.get).toMap
     wrapper.updateIndices()
     wrapper
   }
@@ -144,7 +152,8 @@ object Wrapper {
         // Wrap the element
         val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
 
-        // Wrap the children
+        // Wrap the properties and fields
+        wrapper.properties = node.attributes.asAttrMap
         wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
         wrapper.updateIndices()
         Some(wrapper)

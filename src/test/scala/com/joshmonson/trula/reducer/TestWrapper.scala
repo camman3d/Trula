@@ -49,12 +49,13 @@ class TestWrapper {
   }
 
   @Test
-  def testJavaObjects() {
+  def testWrapProperties() {
     val c = new C("Foo", 32)
     val wrapper = Wrapper.wrap(c)
-    assertTrue(wrapper.fields.size == 2)
-    assertEquals("String", wrapper.fields(0).id.kind.get)
-    assertEquals("Integer", wrapper.fields(1).id.kind.get)
+    assertTrue(wrapper.fields.size == 0)
+    assertTrue(wrapper.properties.size == 2)
+    assertEquals("Foo", wrapper.properties("foo"))
+    assertEquals("32", wrapper.properties("i"))
   }
 
   @Test
@@ -103,10 +104,12 @@ class TestWrapper {
 
   @Test
   def testWrapXML() {
-    val xml = <one><two></two><three></three></one>
+    val xml = <one id="foo"><two></two><three></three></one>
     val wrapper = Wrapper.wrap(xml)
     assertEquals("one", wrapper.id.kind.get)
     assertTrue(wrapper.fields.size == 2)
+    assertTrue(wrapper.properties.size == 1)
+    assertEquals("foo", wrapper.properties("id"))
     assertEquals("two", wrapper.fields(0).id.kind.get)
     assertEquals("three", wrapper.fields(1).id.kind.get)
   }
