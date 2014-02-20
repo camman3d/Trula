@@ -5,16 +5,14 @@ import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.core.{TreeBuilder, SubTreeFinder}
 
 /**
- * Created with IntelliJ IDEA.
- * User: josh
- * Date: 2/17/14
- * Time: 7:15 AM
- * To change this template use File | Settings | File Templates.
+ * The entry point for using Trula for tree reduction.
+ *
+ * @param ruleText The Trula rules
  */
 class TreeReducer(ruleText: String) {
 
   // Parse the rules
-  val rules = {
+  private val rules = {
     val r = RuleParser.parse(ruleText)
     if (r.isDefined)
       r.get
@@ -22,8 +20,13 @@ class TreeReducer(ruleText: String) {
       throw new InvalidSyntaxException()
   }
 
-  val treeBuilder = new TreeBuilder
+  private val treeBuilder = new TreeBuilder
 
+  /**
+   * Reduces an tree-structured object based on the defined rules.
+   * @param obj The object to reduce. If it is not already wrapped, then a new [[com.joshmonson.trula.reducer.wrapping.Wrapper]] is created.
+   * @return The reduced object, contained within a [[com.joshmonson.trula.reducer.wrapping.Wrapper]]
+   */
   def reduce(obj: Any): Wrapper = {
     var tree = obj match {
       case w: Wrapper => w

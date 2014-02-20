@@ -166,3 +166,21 @@ val treeReducer = new TreeReducer(rules)
 val updated = treeReducer.reduce(xml)
 println(updated.obj.get)
 ```
+
+If your rule invokes a method, you will need to define it before invoking the `reduce` method.
+
+```scala
+import com.joshmonson.trula.TreeReducer
+
+val xml =
+  <html>
+    <body>
+      <p>Hello World!</p>
+    </body>
+  </html>
+
+val rules = "p { @s String } -> :done = print(@s)"
+val treeReducer = new TreeReducer(rules)
+treeReducer.addMethod("print", (s: String) => println(s))
+val updated = treeReducer.reduce(xml)
+```
