@@ -1,9 +1,8 @@
 package com.joshmonson.trula.reducer.wrapping
 
 import com.joshmonson.trula.parser.ast.lh.Identifier
-import scala.collection.Seq
 import scala.collection.JavaConversions._
-import scala.xml.{Text, Node, Elem}
+import scala.xml.{Text, Node}
 import scala.runtime.BoxedUnit
 
 /**
@@ -21,7 +20,7 @@ class Wrapper(var id: Identifier) {
   def this(id: Identifier, obj: Any) {
     this(id)
     this.obj = Some(obj)
-//    wrapFields()
+    //    wrapFields()
   }
 
   def this(kind: String) {
@@ -60,7 +59,7 @@ class Wrapper(var id: Identifier) {
 }
 
 object Wrapper {
-//  private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
+  //  private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
 
   def deriveKind(obj: Any) = {
     val name = obj.getClass.getSimpleName
@@ -70,18 +69,18 @@ object Wrapper {
   }
 
   def isBasic(obj: Any) = obj match {
-    case o: String  => true
-    case o: Byte    => true
-    case o: Char    => true
-    case o: Short   => true
-    case o: Int     => true
-    case o: Long    => true
-    case o: Float   => true
-    case o: Double  => true
+    case o: String => true
+    case o: Byte => true
+    case o: Char => true
+    case o: Short => true
+    case o: Int => true
+    case o: Long => true
+    case o: Float => true
+    case o: Double => true
     case o: Boolean => true
     case _ => false
   }
-  
+
   //  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
   def wrap(obj: Any, name: Option[String] = None): Wrapper = obj match {
     case e: Node => wrapXml(e).get
@@ -96,21 +95,21 @@ object Wrapper {
     case o if isBasic(o) => wrapBasic(o, name)
 
     // Other special things
-    case Unit             => new Wrapper(new Identifier(kind = "Unit"))
-    case BoxedUnit.UNIT   => new Wrapper(new Identifier(kind = "Unit"))
-    case n if n == null   => new Wrapper(new Identifier(kind = "null"))
+    case Unit => new Wrapper(new Identifier(kind = "Unit"))
+    case BoxedUnit.UNIT => new Wrapper(new Identifier(kind = "Unit"))
+    case n if n == null => new Wrapper(new Identifier(kind = "null"))
 
     // General object
     case _ => wrapObj(obj, name)
   }
-  
+
   private def wrapList(obj: List[_], kind: String, name: Option[String]) = {
     val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
     wrapper.fields = obj.toList.map(v => wrap(v, Some("value")))
     wrapper.updateIndices()
     wrapper
   }
-  
+
   private def wrapBasic(obj: Any, name: Option[String]) = {
     val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
     new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
@@ -145,17 +144,17 @@ object Wrapper {
     wrapper
   }
 
-    private def wrapXml(node: Node): Option[Wrapper] = node match {
-      case t: Text => if (t.text.trim.isEmpty) None else Some(wrap(t.text.trim))
-      case _ => {
-        // Wrap the element
-        val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
+  private def wrapXml(node: Node): Option[Wrapper] = node match {
+    case t: Text => if (t.text.trim.isEmpty) None else Some(wrap(t.text.trim))
+    case _ => {
+      // Wrap the element
+      val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
 
-        // Wrap the properties and fields
-        wrapper.id = wrapper.id.copy(properties = node.attributes.asAttrMap)
-        wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
-        wrapper.updateIndices()
-        Some(wrapper)
-      }
+      // Wrap the properties and fields
+      wrapper.id = wrapper.id.copy(properties = node.attributes.asAttrMap)
+      wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
+      wrapper.updateIndices()
+      Some(wrapper)
     }
+  }
 }

@@ -4,14 +4,14 @@ import com.joshmonson.trula.parser.ast.rh.Reference
 
 
 case class Identifier(
-  label: Option[String] = None,
-  kind: Option[String] = None,
-  name: Option[String] = None,
-  index: Option[Int] = None,
-  parentage: Option[Parentage] = None,
-  not: Boolean = false,
-  properties: Map[String, String] = Map()
-) {
+                       label: Option[String] = None,
+                       kind: Option[String] = None,
+                       name: Option[String] = None,
+                       index: Option[Int] = None,
+                       parentage: Option[Parentage] = None,
+                       not: Boolean = false,
+                       properties: Map[String, String] = Map()
+                       ) {
 
   def this(label: String = null, kind: String = null, name: String = null) {
     this(

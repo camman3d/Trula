@@ -15,29 +15,58 @@ match parents, ancestors, children, and descendants.
         [ Descendant ]
     }
 
-There are two properties against which a node is checked for a match: `kind` and `name`. You can specify that
-you are looking for a name by putting a colon `:` in front of it. For example:
+Each node has a `kind`, a `name`, and a set of `properties`. Properties are key-value pairs. Names are defined with a
+preceding colon ':'. The syntax for kind and name is:
 
-    Kind1 {
-        :name1
+    Kind {
+        :name
         Kind2:name2
     }
 
+Properties are defined within square brackets. The syntax is:
 
-In the context of Scala or Java, the kind is equivalent to the type and name to the property name. For example,
-an object created from the following Scala class
+    Foo[name = "bar"] {
+        Child["My Name" = "baz", age = "4"]
+    }
+
+In the context of Scala or Java, the kind is equivalent to the type and name to the property name. Basic or primitive
+types are used as properties.
+
+**Example 1:** Given the following Scala code:
 
 ```scala
-class Foo(val name: String) {
+class Bar() {}
+
+class Foo(val name: String, val next: Bar) {
     val age = name.length
 }
+
+val example = new Foo("trula!", new Bar())
 ```
 
-would match against the following structure definition:
+The equivalent Trula structure definition for `example` would be:
 
-    Foo {
+    Foo[name = "trula!", age = "6"] {
         String:name
         Int:age
+    }
+
+In the context of XML, the kind is equivalent to the tag label and tag properties are kept. There are no names.
+
+**Example 2:** Given the following XML:
+
+```xml
+<div id="container">
+    <p>Hello world!</p>
+</div>
+```
+
+The equivalent Trula structure definition would be:
+
+    div[id = "container"] {
+        p {
+            String
+        }
     }
 
 You can specify only the nodes/properties you are interested in:
@@ -66,10 +95,10 @@ You can specify wildcards `%` which match any node:
         }
     }
 
-You can still enforce parentage with wildcards:
+You can still enforce parentage and properties with wildcards:
 
-    Foo > % {
-        Bar
+    Foo > %[name = "bar"] {
+        Baz
     }
 
 ### Transforming
@@ -113,3 +142,27 @@ the left-hand structure for use within the right-hand side:
             @bar2
         }
     }
+
+You can add/replace properties:
+
+    Foo[name = "bar"] -> Foo[name = "baz"]
+
+## Scala Engine
+
+To use Trula to perform tree reduction you will use the `TreeReducer` class.
+
+```scala
+import com.joshmonson.trula.TreeReducer
+
+val xml =
+  <html>
+    <body>
+      <p>Hello World!</p>
+    </body>
+  </html>
+
+val rules = "p -> div"
+val treeReducer = new TreeReducer(rules)
+val updated = treeReducer.reduce(xml)
+println(updated.obj.get)
+```

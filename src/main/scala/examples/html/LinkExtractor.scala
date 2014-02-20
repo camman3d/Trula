@@ -1,6 +1,5 @@
 package examples.html
 
-import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.TreeReducer
 import scala.xml.Elem
 
@@ -19,10 +18,12 @@ object LinkExtractor {
         <div id="container">
           <h1>This is a test</h1>
           <p>
-            This is the first text. <a href="foo">Go somewhere</a>
+            This is the first text.
+            <a href="foo">Go somewhere</a>
           </p>
           <p>
-            This is the first text. <a href="a">A Link</a> <a href="a">B Link</a>
+            This is the first text.
+            <a href="a">A Link</a> <a href="a">B Link</a>
           </p>
         </div>
       </body>

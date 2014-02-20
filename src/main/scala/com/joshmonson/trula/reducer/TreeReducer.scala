@@ -72,11 +72,17 @@ class TreeReducer(ruleText: String) {
   }
 
   def addMethod(n: String, f: () => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1](n: String, f: (T1) => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1, T2](n: String, f: (T1, T2) => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1, T2, T3](n: String, f: (T1, T2, T3) => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1, T2, T3, T4](n: String, f: (T1, T2, T3, T4) => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1, T2, T3, T4, T5](n: String, f: (T1, T2, T3, T4, T5) => Any) = treeBuilder.add(n, f)
+
   def addMethod[T1, T2, T3, T4, T5, T6](n: String, f: (T1, T2, T3, T4, T5, T6) => Any) = treeBuilder.add(n, f)
 
 }

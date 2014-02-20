@@ -1,7 +1,6 @@
 package examples.calculator
 
 import com.joshmonson.trula.reducer.TreeReducer
-import scala.util.parsing.combinator.RegexParsers
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,8 +12,11 @@ import scala.util.parsing.combinator.RegexParsers
 object Calculator {
 
   case class Add(lh: Any, rh: Any)
+
   case class Sub(lh: Any, rh: Any)
+
   case class Mul(lh: Any, rh: Any)
+
   case class Div(lh: Any, rh: Any)
 
   val rules =
@@ -42,7 +44,7 @@ object Calculator {
       val result = treeReducer.reduce(example)
       println("Result: " + result.obj.get)
     })
-    
+
   }
-  
+
 }

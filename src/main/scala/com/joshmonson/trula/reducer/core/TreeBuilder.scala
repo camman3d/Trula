@@ -24,25 +24,33 @@ class TreeBuilder {
     case w: Wrapper => w
     case d: Any => Wrapper.wrap(d)
   }
+
   private def prep[T](a: Wrapper) = a.obj.get.asInstanceOf[T]
+
   def add(n: String, f: () => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f()))
   }
+
   def add[T1](n: String, f: (T1) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)))))
   }
+
   def add[T1, T2](n: String, f: (T1, T2) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)), prep(a(1)))))
   }
+
   def add[T1, T2, T3](n: String, f: (T1, T2, T3) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)), prep(a(1)), prep(a(2)))))
   }
+
   def add[T1, T2, T3, T4](n: String, f: (T1, T2, T3, T4) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)), prep(a(1)), prep(a(2)), prep(a(3)))))
   }
+
   def add[T1, T2, T3, T4, T5](n: String, f: (T1, T2, T3, T4, T5) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)), prep(a(1)), prep(a(2)), prep(a(3)), prep(a(4)))))
   }
+
   def add[T1, T2, T3, T4, T5, T6](n: String, f: (T1, T2, T3, T4, T5, T6) => Any) {
     methods += n -> ((a: List[Wrapper]) => wrap(f(prep(a(0)), prep(a(1)), prep(a(2)), prep(a(3)), prep(a(4)), prep(a(5)))))
   }

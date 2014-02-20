@@ -19,8 +19,9 @@ import com.joshmonson.trula.parser.ast.lh.Identifier
  */
 object RuleParser extends RegexParsers {
 
-  val string = "\"(\\\\\"|[^\"])+\"".r ^^ {d =>
-    d.substring(1, d.length - 1).replaceAll("\\\\\"", "\"")
+  val string = "\"(\\\\\"|[^\"])+\"".r ^^ {
+    d =>
+      d.substring(1, d.length - 1).replaceAll("\\\\\"", "\"")
   }
   val text = "[a-zA-Z0-9-_]+".r
   val label = "@" ~ text ^^ {
@@ -37,11 +38,13 @@ object RuleParser extends RegexParsers {
   }
 
   // Different ways to identify on the left-hand
-  val property = (text | string) ~ "=" ~ string ^^ {d =>
-    d._1._1 -> d._2
+  val property = (text | string) ~ "=" ~ string ^^ {
+    d =>
+      d._1._1 -> d._2
   }
-  val properties = "[" ~ property ~ rep("," ~ property) ~ "]" ^^ {d =>
-    d._1._2.map(_._2).toMap + d._1._1._2
+  val properties = "[" ~ property ~ rep("," ~ property) ~ "]" ^^ {
+    d =>
+      d._1._2.map(_._2).toMap + d._1._1._2
   }
   val kindId = (label ?) ~ text ^^ {
     d =>
@@ -104,8 +107,9 @@ object RuleParser extends RegexParsers {
   val kindNameRef = text ~ name ^^ {
     d => new Reference(None, Some(d._1), Some(d._2))
   }
-  val ref = (kindNameRef | labelRef | kindRef | nameRef) ~ (properties ?) ^^ {d =>
-    d._1.copy(properties = d._2.getOrElse(Map()))
+  val ref = (kindNameRef | labelRef | kindRef | nameRef) ~ (properties ?) ^^ {
+    d =>
+      d._1.copy(properties = d._2.getOrElse(Map()))
   }
 
   // Define how the right-hand structure looks
@@ -128,7 +132,9 @@ object RuleParser extends RegexParsers {
       Assignment(d._1._1, d._2)
   }
 
-  val rhDeletion = "~" ^^ {d => Deletion()}
+  val rhDeletion = "~" ^^ {
+    d => Deletion()
+  }
 
   // Rule definitions
   val rule = lhStructureDef ~ "->" ~ (rhDef | rhDeletion) ^^ {

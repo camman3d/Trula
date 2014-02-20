@@ -10,11 +10,11 @@ import com.joshmonson.trula.parser.ast.lh.Identifier
  * To change this template use File | Settings | File Templates.
  */
 case class Reference(
-  label: Option[String] = None,
-  kind: Option[String] = None,
-  name: Option[String] = None,
-  properties: Map[String, String] = Map()
-) {
+                      label: Option[String] = None,
+                      kind: Option[String] = None,
+                      name: Option[String] = None,
+                      properties: Map[String, String] = Map()
+                      ) {
 
   def references(id: Identifier) = {
     if (label.isDefined)
