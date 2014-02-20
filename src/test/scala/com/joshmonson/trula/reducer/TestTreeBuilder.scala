@@ -58,4 +58,24 @@ class TestTreeBuilder {
     assertEquals("c", rebuilt.id.name.get)
   }
 
+  @Test
+  def testBuildNewProperty() {
+    val a = Wrapper.wrap(<A name="a"></A>)
+    val rule = RuleParser.parse("A -> A[foo = \"bar\"]").get(0)
+    val store = SubTreeFinder.find(a, rule.lh)
+    val rebuilt = new TreeBuilder().build(rule.rh, store.get)
+    assertTrue(rebuilt.id.properties.size == 2)
+    assertEquals("bar", rebuilt.id.properties("foo"))
+  }
+
+  @Test
+  def testBuildOverwriteProperty() {
+    val a = Wrapper.wrap(<A name="a"></A>)
+    val rule = RuleParser.parse("A -> A[name = \"bar\"]").get(0)
+    val store = SubTreeFinder.find(a, rule.lh)
+    val rebuilt = new TreeBuilder().build(rule.rh, store.get)
+    assertTrue(rebuilt.id.properties.size == 1)
+    assertEquals("bar", rebuilt.id.properties("name"))
+  }
+
 }

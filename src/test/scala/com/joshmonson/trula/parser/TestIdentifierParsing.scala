@@ -188,5 +188,12 @@ class TestIdentifierParsing {
     assertTrue(result.isEmpty)
   }
 
+  @Test
+  def testRefProperties() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo["this" = "that", "one" = "t\"wo"]""")
+    assertEquals("that", result.get.properties("this"))
+    assertEquals("t\"wo", result.get.properties("one"))
+  }
+
 
 }

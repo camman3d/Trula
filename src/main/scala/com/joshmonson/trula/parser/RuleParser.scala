@@ -104,7 +104,9 @@ object RuleParser extends RegexParsers {
   val kindNameRef = text ~ name ^^ {
     d => new Reference(None, Some(d._1), Some(d._2))
   }
-  val ref = kindNameRef | labelRef | kindRef | nameRef
+  val ref = (kindNameRef | labelRef | kindRef | nameRef) ~ (properties ?) ^^ {d =>
+    d._1.copy(properties = d._2.getOrElse(Map()))
+  }
 
   // Define how the right-hand structure looks
   val rhDef: Parser[Definition] = rhAssignment | rhStructure

@@ -59,6 +59,9 @@ class TreeBuilder {
       // Now add the children
       for (child <- structure.children)
         obj.add(build(child, store))
+
+      // Update the properties
+      obj.id = obj.id.updated(definition.id)
       obj
     }
     case assignment: Assignment => {
@@ -75,6 +78,7 @@ class TreeBuilder {
         value.id = value.id.copy(name = assignment.id.name)
       if (assignment.id.kind.isDefined)
         value.id = value.id.copy(kind = assignment.id.kind)
+      value.id = value.id.updated(assignment.id)
       value
     }
     case _: Deletion => null

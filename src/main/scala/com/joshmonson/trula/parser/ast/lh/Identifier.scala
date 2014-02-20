@@ -1,5 +1,7 @@
 package com.joshmonson.trula.parser.ast.lh
 
+import com.joshmonson.trula.parser.ast.rh.Reference
+
 
 case class Identifier(
   label: Option[String] = None,
@@ -24,6 +26,11 @@ case class Identifier(
       name.map(_ == target.name.getOrElse("")).getOrElse(true) &&
       index.map(_ == target.index.getOrElse(-1)).getOrElse(true) &&
       properties.forall(entry => entry._2 == target.properties(entry._1))
+  }
+
+  def updated(ref: Reference) = {
+    val updated = ref.properties.foldLeft(properties)((p1, entry) => p1.updated(entry._1, entry._2))
+    copy(properties = updated)
   }
 
   override def toString: String =

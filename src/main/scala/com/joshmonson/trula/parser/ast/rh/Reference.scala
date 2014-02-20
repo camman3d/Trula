@@ -10,16 +10,18 @@ import com.joshmonson.trula.parser.ast.lh.Identifier
  * To change this template use File | Settings | File Templates.
  */
 case class Reference(
-                      label: Option[String] = None,
-                      kind: Option[String] = None,
-                      name: Option[String] = None
-                      ) {
+  label: Option[String] = None,
+  kind: Option[String] = None,
+  name: Option[String] = None,
+  properties: Map[String, String] = Map()
+) {
 
   def references(id: Identifier) = {
     if (label.isDefined)
       label == id.label
     else
-      kind.map(_ == id.kind.getOrElse("")).getOrElse(true) && name.map(_ == id.name.getOrElse("")).getOrElse(true)
+      kind.map(_ == id.kind.getOrElse("")).getOrElse(true) &&
+        name.map(_ == id.name.getOrElse("")).getOrElse(true)
   }
 
   def toId = Identifier(label, kind, name)
