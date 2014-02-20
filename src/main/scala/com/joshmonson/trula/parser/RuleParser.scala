@@ -19,6 +19,9 @@ import com.joshmonson.trula.parser.ast.lh.Identifier
  */
 object RuleParser extends RegexParsers {
 
+  val string = "\"(\\\\\"|[^\"])+\"".r ^^ {d =>
+    d.substring(1, d.length - 1).replaceAll("\\\\\"", "\"")
+  }
   val text = "[a-zA-Z0-9-_]+".r
   val label = "@" ~ text ^^ {
     _._2
@@ -34,25 +37,31 @@ object RuleParser extends RegexParsers {
   }
 
   // Different ways to identify on the left-hand
-  val kindId = (label ?) ~ text ~ (index ?) ^^ {
-    d =>
-      Identifier(d._1._1, Some(d._1._2), None, d._2)
+  val property = (text | string) ~ "=" ~ string ^^ {d =>
+    d._1._1 -> d._2
   }
-  val nameId = (label ?) ~ name ~ (index ?) ^^ {
-    d =>
-      Identifier(d._1._1, None, Some(d._1._2), d._2)
+  val properties = "[" ~ property ~ rep("," ~ property) ~ "]" ^^ {d =>
+    d._1._2.map(_._2).toMap + d._1._1._2
   }
-  val kindNameId = (label ?) ~ text ~ name ~ (index ?) ^^ {
+  val kindId = (label ?) ~ text ^^ {
     d =>
-      Identifier(d._1._1._1, Some(d._1._1._2), Some(d._1._2), d._2)
+      Identifier(d._1, Some(d._2), None)
+  }
+  val nameId = (label ?) ~ name ^^ {
+    d =>
+      Identifier(d._1, None, Some(d._2))
+  }
+  val kindNameId = (label ?) ~ text ~ name ^^ {
+    d =>
+      Identifier(d._1._1, Some(d._1._2), Some(d._2))
   }
   val wildcard = (label ?) ~ "%" ^^ {
     d =>
       Identifier(d._1)
   }
-  val basicId = not ~ (kindNameId | kindId | nameId | wildcard) ^^ {
+  val basicId = not ~ (kindNameId | kindId | nameId | wildcard) ~ (index ?) ~ (properties ?) ^^ {
     d =>
-      d._2.copy(not = d._1)
+      d._1._1._2.copy(index = d._1._2, not = d._1._1._1, properties = d._2.getOrElse(Map()))
   }
 
   // Now add in ancestor identification

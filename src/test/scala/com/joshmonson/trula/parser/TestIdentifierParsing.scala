@@ -114,6 +114,44 @@ class TestIdentifierParsing {
   }
 
   @Test
+  def testIdWildcard3() {
+    val result = RuleParser.parseRule(RuleParser.id, "%(4)")
+    assertTrue(result.get.index.get == 4)
+  }
+
+  @Test
+  def testIdProperties1() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo["this" = "that"]""")
+    assertEquals("that", result.get.properties("this"))
+  }
+
+  @Test
+  def testIdProperties2() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo["this" = "that", "one" = "two"]""")
+    assertEquals("that", result.get.properties("this"))
+    assertEquals("two", result.get.properties("one"))
+  }
+
+  @Test
+  def testIdProperties3() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo["this" = "th\"at"]""")
+    assertEquals("th\"at", result.get.properties("this"))
+  }
+
+  @Test
+  def testIdProperties4() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo[this = "that"]""")
+    assertEquals("that", result.get.properties("this"))
+  }
+
+  @Test
+  def testIdPropertiesWithIndex() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo(8)["this" = "that"]""")
+    assertEquals("that", result.get.properties("this"))
+    assertTrue(result.get.index.get == 8)
+  }
+
+  @Test
   def testRefKind() {
     val result = RuleParser.parseRule(RuleParser.ref, "A")
     assertTrue(result.get.kind.get == "A")

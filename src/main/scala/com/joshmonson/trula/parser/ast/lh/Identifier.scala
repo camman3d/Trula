@@ -2,13 +2,14 @@ package com.joshmonson.trula.parser.ast.lh
 
 
 case class Identifier(
-                       label: Option[String] = None,
-                       kind: Option[String] = None,
-                       name: Option[String] = None,
-                       index: Option[Int] = None,
-                       parentage: Option[Parentage] = None,
-                       not: Boolean = false
-                       ) {
+  label: Option[String] = None,
+  kind: Option[String] = None,
+  name: Option[String] = None,
+  index: Option[Int] = None,
+  parentage: Option[Parentage] = None,
+  not: Boolean = false,
+  properties: Map[String, String] = Map()
+) {
 
   def this(label: String = null, kind: String = null, name: String = null) {
     this(
@@ -21,7 +22,8 @@ case class Identifier(
   def identifies(target: Identifier) = {
     kind.map(_ == target.kind.getOrElse("")).getOrElse(true) &&
       name.map(_ == target.name.getOrElse("")).getOrElse(true) &&
-      index.map(_ == target.index.getOrElse(-1)).getOrElse(true)
+      index.map(_ == target.index.getOrElse(-1)).getOrElse(true) &&
+      properties.forall(entry => entry._2 == target.properties(entry._1))
   }
 
   override def toString: String =

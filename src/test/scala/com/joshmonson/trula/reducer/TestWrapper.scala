@@ -53,9 +53,9 @@ class TestWrapper {
     val c = new C("Foo", 32)
     val wrapper = Wrapper.wrap(c)
     assertTrue(wrapper.fields.size == 0)
-    assertTrue(wrapper.properties.size == 2)
-    assertEquals("Foo", wrapper.properties("foo"))
-    assertEquals("32", wrapper.properties("i"))
+    assertTrue(wrapper.id.properties.size == 2)
+    assertEquals("Foo", wrapper.id.properties("foo"))
+    assertEquals("32", wrapper.id.properties("i"))
   }
 
   @Test
@@ -108,8 +108,8 @@ class TestWrapper {
     val wrapper = Wrapper.wrap(xml)
     assertEquals("one", wrapper.id.kind.get)
     assertTrue(wrapper.fields.size == 2)
-    assertTrue(wrapper.properties.size == 1)
-    assertEquals("foo", wrapper.properties("id"))
+    assertTrue(wrapper.id.properties.size == 1)
+    assertEquals("foo", wrapper.id.properties("id"))
     assertEquals("two", wrapper.fields(0).id.kind.get)
     assertEquals("three", wrapper.fields(1).id.kind.get)
   }

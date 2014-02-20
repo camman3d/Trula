@@ -16,7 +16,6 @@ import scala.runtime.BoxedUnit
 class Wrapper(var id: Identifier) {
   var obj: Option[Any] = None
   var fields: List[Wrapper] = Nil
-  var properties: Map[String, String] = Map()
   var used = false
 
   def this(id: Identifier, obj: Any) {
@@ -141,7 +140,7 @@ object Wrapper {
     }
     val wrappedFields = wrapFields(obj.getClass)
     wrapper.fields = wrappedFields.filter(_.isRight).map(_.right.get)
-    wrapper.properties = wrappedFields.filter(_.isLeft).map(_.left.get).toMap
+    wrapper.id = wrapper.id.copy(properties = wrappedFields.filter(_.isLeft).map(_.left.get).toMap)
     wrapper.updateIndices()
     wrapper
   }
@@ -153,7 +152,7 @@ object Wrapper {
         val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
 
         // Wrap the properties and fields
-        wrapper.properties = node.attributes.asAttrMap
+        wrapper.id = wrapper.id.copy(properties = node.attributes.asAttrMap)
         wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
         wrapper.updateIndices()
         Some(wrapper)

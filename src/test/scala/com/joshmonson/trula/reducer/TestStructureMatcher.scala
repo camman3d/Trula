@@ -84,4 +84,32 @@ class TestStructureMatcher {
     val structure = RuleParser.parse("% { C } -> X").get(0).lh
     assertFalse(StructureMatcher.matches(a, structure))
   }
+
+  @Test
+  def testMatchesProperties1() {
+    val obj = Wrapper.wrap(<b name="c"></b>)
+    val structure = RuleParser.parse("""b[name="c"] -> X""").get(0).lh
+    assertTrue(StructureMatcher.matches(obj, structure))
+  }
+
+  @Test
+  def testMatchesProperties2() {
+    val obj = Wrapper.wrap(<b name="c"></b>)
+    val structure = RuleParser.parse("""b[name="d"] -> X""").get(0).lh
+    assertFalse(StructureMatcher.matches(obj, structure))
+  }
+
+  @Test
+  def testMatchesProperties3() {
+    val obj = Wrapper.wrap(<b name="c" age="4"></b>)
+    val structure = RuleParser.parse("""b[name="c", age="4"] -> X""").get(0).lh
+    assertTrue(StructureMatcher.matches(obj, structure))
+  }
+
+  @Test
+  def testMatchesProperties4() {
+    val obj = Wrapper.wrap(<b name="c" age="4"></b>)
+    val structure = RuleParser.parse("""b[name="c", age="5"] -> X""").get(0).lh
+    assertFalse(StructureMatcher.matches(obj, structure))
+  }
 }
