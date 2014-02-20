@@ -54,7 +54,7 @@ class TestTreeReducer {
       fail()
     } catch {
       case e: NotReducibleException => assertTrue(true)
-      case _ => fail()
+      case _: Throwable => fail()
     }
   }
 }

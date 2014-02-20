@@ -31,14 +31,14 @@ object Calculator {
   treeReducer.addMethod("mul", (a: Int, b: Int) => a * b)
   treeReducer.addMethod("div", (a: Int, b: Int) => a / b)
 
+  val examples = List(
+    Add(14, -16),
+    Add(Mul(2, 3), Sub(4, 2)),
+    Div(Add(2, 8), 2)
+  )
 
   def main(args: Array[String]) {
-
-    List(
-      Add(14, -16),
-      Add(Mul(2, 3), Sub(4, 2)),
-      Div(Add(2, 8), 2)
-    ).foreach(example => {
+    examples.foreach(example => {
       val result = treeReducer.reduce(example)
       println("Result: " + result.obj.get)
     })

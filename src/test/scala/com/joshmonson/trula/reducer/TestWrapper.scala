@@ -29,9 +29,7 @@ class TestWrapper {
     val wrapper = new Wrapper(new Identifier(kind = "Foo", name = "Bar"), a)
     assertEquals("Foo", wrapper.id.kind.get)
     assertEquals("Bar", wrapper.id.name.get)
-    assertTrue(wrapper.fields.size == 1)
-    assertEquals("B", wrapper.fields(0).id.kind.get)
-    assertEquals("b", wrapper.fields(0).id.name.get)
+    assertTrue(wrapper.fields.size == 0)
   }
 
   @Test
@@ -64,8 +62,8 @@ class TestWrapper {
     val d = new D(Some("This"), Right(2.1), ("One", "two", 3))
     val wrapper = Wrapper.wrap(d)
     assertTrue(wrapper.fields.size == 3)
-    assertEquals("Option", wrapper.fields(0).id.kind.get)
-    assertEquals("Either", wrapper.fields(1).id.kind.get)
+    assertEquals("Some", wrapper.fields(0).id.kind.get)
+    assertEquals("Right", wrapper.fields(1).id.kind.get)
     assertEquals("Tuple3", wrapper.fields(2).id.kind.get)
   }
 
@@ -101,6 +99,16 @@ class TestWrapper {
     val list = Set("One", "Two", "Three")
     val wrapper = Wrapper.wrap(list)
     assertTrue(wrapper.fields.size == 3)
+  }
+
+  @Test
+  def testWrapXML() {
+    val xml = <one><two></two><three></three></one>
+    val wrapper = Wrapper.wrap(xml)
+    assertEquals("one", wrapper.id.kind.get)
+    assertTrue(wrapper.fields.size == 2)
+    assertEquals("two", wrapper.fields(0).id.kind.get)
+    assertEquals("three", wrapper.fields(1).id.kind.get)
   }
 
 }

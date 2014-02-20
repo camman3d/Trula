@@ -3,6 +3,8 @@ package com.joshmonson.trula.reducer.wrapping
 import com.joshmonson.trula.parser.ast.lh.Identifier
 import scala.collection.Seq
 import scala.collection.JavaConversions._
+import scala.xml.{Text, Node, Elem}
+import scala.runtime.BoxedUnit
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +21,7 @@ class Wrapper(var id: Identifier) {
   def this(id: Identifier, obj: Any) {
     this(id)
     this.obj = Some(obj)
-    wrapFields()
+//    wrapFields()
   }
 
   def this(kind: String) {
@@ -45,67 +47,107 @@ class Wrapper(var id: Identifier) {
 
   def size: Int = 1 + fields.map(_.size).sum
 
-
-
-  private def wrapFields(_class: Class[_]): List[Wrapper] = {
-    val typeName = if (_class.getCanonicalName == null) _class.getName else _class.getCanonicalName
-    if (_class == classOf[Any] || _class == classOf[AnyRef] || _class == classOf[Object] ||
-      typeName.startsWith("java.lang") || Wrapper.primitives.contains(typeName))
-
-      // Don't pull out fields
-      Nil
-    else if (classOf[Seq[_]].isAssignableFrom(_class)) {
-
-      // Handle scala lists
-      obj.get.asInstanceOf[Seq[_]].toList.map(d => {
-        new Wrapper(new Identifier(kind = d.getClass.getSimpleName, name = "value"), d)
-      })
-    } else if (classOf[Set[_]].isAssignableFrom(_class)) {
-
-      // Handle scala sets
-      obj.get.asInstanceOf[Set[_]].toList.map(d => {
-        new Wrapper(new Identifier(kind = d.getClass.getSimpleName, name = "value"), d)
-      })
-    } else if (classOf[java.util.List[_]].isAssignableFrom(_class)) {
-
-      // Handle Java lists by converting them to scala
-      val javaList = obj.get.asInstanceOf[java.util.List[_]]
-      val scalaList = javaList.toList
-      obj = Some(scalaList)
-      wrapFields(scalaList.getClass)
-    } else if (classOf[java.util.Set[_]].isAssignableFrom(_class)) {
-
-      // Handle Java sets by converting them to scala
-      val javaSet = obj.get.asInstanceOf[java.util.Set[_]]
-      val scalaSet = javaSet.toSet
-      obj = Some(scalaSet)
-      wrapFields(scalaSet.getClass)
-    } else {
-
-      // Generic object. Recursively pull out fields
-      val declaredFields = if (_class.getDeclaredFields == null) Nil else _class.getDeclaredFields.toList
-      declaredFields.map(field => {
-        field.setAccessible(true)
-        val fieldObj = field.get(obj.get)
-        val fieldKind = fieldObj.getClass.getSimpleName
-        new Wrapper(new Identifier(kind = fieldKind, name = field.getName), fieldObj)
-      }) ::: wrapFields(_class.getSuperclass)
-    }
-  }
-
-  private def wrapFields() {
-    fields = wrapFields(obj.get.getClass)
-    updateIndices()
-  }
-
   def updateIndices() {
     for (i <- 0 until fields.size)
       fields(i).id = fields(i).id.copy(index = Some(i))
   }
 
+  def toString(indent: String): String =
+    indent + id + ": " + obj.map(o => Wrapper.deriveKind(o)) + "\n" +
+      fields.map(_.toString(indent + "+  ")).mkString("")
+
+  override def toString: String = toString("")
 }
 
 object Wrapper {
   private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
-  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
+
+  def deriveKind(obj: Any) = {
+    val name = obj.getClass.getSimpleName
+    if (name == null)
+      obj.getClass.getCanonicalName
+    name
+  }
+  
+  //  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
+  def wrap(obj: Any, name: Option[String] = None): Wrapper = obj match {
+    case e: Node => wrapXml(e).get
+
+    // Collections
+    case l: List[_] => wrapList(l, deriveKind(l), name)
+    case s: Set[_] => wrapList(s.toList, deriveKind(s), name)
+    case l: java.util.List[_] => wrap(l.toList, name)
+    case s: java.util.Set[_] => wrap(s.toSet, name)
+
+    // Basic objects/primitives
+    case o: String  => wrapBasic(o, name)
+    case o: Byte    => wrapBasic(o, name)
+    case o: Char    => wrapBasic(o, name)
+    case o: Short   => wrapBasic(o, name)
+    case o: Int     => wrapBasic(o, name)
+    case o: Long    => wrapBasic(o, name)
+    case o: Float   => wrapBasic(o, name)
+    case o: Double  => wrapBasic(o, name)
+    case o: Boolean => wrapBasic(o, name)
+
+    // Other special things
+    case Unit           => new Wrapper(new Identifier(kind = "Unit"))
+    case BoxedUnit.UNIT => new Wrapper(new Identifier(kind = "Unit"))
+
+    // General object
+    case _ => wrapObj(obj, name)
+  }
+  
+  private def wrapList(obj: List[_], kind: String, name: Option[String]) = {
+    val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+    wrapper.fields = obj.toList.map(v => wrap(v, Some("value")))
+    wrapper.updateIndices()
+    wrapper
+  }
+  
+  private def wrapBasic(obj: Any, name: Option[String]) = {
+    val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
+    new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+  }
+
+  private def wrapObj(obj: Any, name: Option[String]): Wrapper = {
+
+    // Check for null
+    if (obj == null)
+      return new Wrapper(new Identifier(kind = "null"))
+
+    // Wrap the object
+    val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
+    val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+
+    // Wrap the fields
+    def wrapFields(_class: Class[_]): List[Wrapper] = {
+      if (_class == classOf[Object] || _class == classOf[Any] || _class == classOf[AnyRef])
+        Nil
+      else {
+        val fields = if (_class.getDeclaredFields == null) Nil else _class.getDeclaredFields.toList
+        fields.map(f => {
+          f.setAccessible(true)
+          val fieldObj = f.get(obj)
+          wrap(fieldObj, Some(f.getName))
+        }) ++ wrapFields(_class.getSuperclass)
+      }
+    }
+    wrapper.fields = wrapFields(obj.getClass)
+    wrapper.updateIndices()
+    wrapper
+  }
+
+    private def wrapXml(node: Node): Option[Wrapper] = node match {
+      case t: Text => if (t.text.trim.isEmpty) None else Some(wrap(t.text.trim))
+      case _ => {
+        // Wrap the element
+        val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
+
+        // Wrap the children
+        wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
+        wrapper.updateIndices()
+        Some(wrapper)
+      }
+    }
 }
