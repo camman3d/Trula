@@ -112,4 +112,13 @@ class TestStructureMatcher {
     val structure = RuleParser.parse("""b[name="c", age="5"] -> X""").get(0).lh
     assertFalse(StructureMatcher.matches(obj, structure))
   }
+
+  @Test
+  def testMatchesParentProperties() {
+    val obj1 = Wrapper.wrap(<div class="foo"><a href="#">Foo</a></div>)
+    val obj2 = Wrapper.wrap(<div class="bar"><a href="#">Bar</a></div>)
+    val structure = RuleParser.parse("""div[class="foo"] > a -> X""").get(0).lh
+    assertTrue(StructureMatcher.matches(obj1.fields(0), structure, List(obj1)))
+    assertFalse(StructureMatcher.matches(obj2.fields(0), structure, List(obj2)))
+  }
 }

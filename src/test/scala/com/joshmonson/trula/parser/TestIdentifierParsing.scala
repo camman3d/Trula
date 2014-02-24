@@ -152,6 +152,12 @@ class TestIdentifierParsing {
   }
 
   @Test
+  def testParentProperties() {
+    val result = RuleParser.parseRule(RuleParser.id, """Foo[one="two"] > Bar""")
+    assertEquals("two", result.get.parentage.get.id.properties("one"))
+  }
+
+  @Test
   def testRefKind() {
     val result = RuleParser.parseRule(RuleParser.ref, "A")
     assertTrue(result.get.kind.get == "A")

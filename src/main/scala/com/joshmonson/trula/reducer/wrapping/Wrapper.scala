@@ -4,6 +4,7 @@ import com.joshmonson.trula.parser.ast.lh.Identifier
 import scala.collection.JavaConversions._
 import scala.xml.{Text, Node}
 import scala.runtime.BoxedUnit
+import scala.collection.mutable
 
 /**
  * Created with IntelliJ IDEA.
@@ -59,7 +60,23 @@ class Wrapper(var id: Identifier) {
 }
 
 object Wrapper {
-  //  private val primitives = List("int", "double", "char", "double", "float", "long", "byte", "boolean")
+
+  /**
+   * A wrapper map which looks at object references
+   */
+  private class WrapperCache {
+    private var data = Set[(AnyRef, Wrapper)]()
+
+    def contains(obj: AnyRef) = data.exists(d => d._1.eq(obj))
+    def += (item: (AnyRef, Wrapper)) {
+      data += item
+    }
+    def apply(obj: AnyRef) = data.find(d => d._1.eq(obj)).get._2
+
+  }
+
+  // This is where special wrapper functions are saved
+  var handlers = Set[AnyRef => Option[Wrapper]]()
 
   def deriveKind(obj: Any) = {
     val name = obj.getClass.getSimpleName
@@ -81,45 +98,76 @@ object Wrapper {
     case _ => false
   }
 
-  //  def wrap(obj: Any) = new Wrapper(new Identifier(kind = Some(obj.getClass.getSimpleName)), obj)
-  def wrap(obj: Any, name: Option[String] = None): Wrapper = obj match {
-    case e: Node => wrapXml(e).get
-
-    // Collections
-    case l: List[_] => wrapList(l, deriveKind(l), name)
-    case s: Set[_] => wrapList(s.toList, deriveKind(s), name)
-    case l: java.util.List[_] => wrap(l.toList, name)
-    case s: java.util.Set[_] => wrap(s.toSet, name)
-
-    // Basic objects/primitives
-    case o if isBasic(o) => wrapBasic(o, name)
-
-    // Other special things
-    case Unit => new Wrapper(new Identifier(kind = "Unit"))
-    case BoxedUnit.UNIT => new Wrapper(new Identifier(kind = "Unit"))
-    case n if n == null => new Wrapper(new Identifier(kind = "null"))
-
-    // General object
-    case _ => wrapObj(obj, name)
+  def wrap(obj: Any, name: Option[String] = None): Wrapper = {
+    wrap(obj, name, new WrapperCache)
   }
 
-  private def wrapList(obj: List[_], kind: String, name: Option[String]) = {
+  /**
+   * Transforms objects to Wrappers
+   */
+  private def wrap(obj: Any, name: Option[String], cache: WrapperCache): Wrapper = obj match {
+      // Basic objects/primitives
+      case o if isBasic(o) => wrapBasic(o, name)
+
+      // Check the cache to handle cycles
+      case o: AnyRef if cache.contains(o) => cache(o)
+
+      // XML
+      case e: Node => wrapXml(e, cache).get
+
+      // Collections
+      case l: List[_] => wrapList(l, deriveKind(l), name, cache)
+      case s: Set[_] => wrapList(s.toList, deriveKind(s), name, cache)
+      case l: java.util.List[_] => wrap(l.toList, name, cache)
+      case s: java.util.Set[_] => wrap(s.toSet, name, cache)
+
+      // Other special things
+      case Unit => new Wrapper(new Identifier(kind = "Unit"))
+      case BoxedUnit.UNIT => new Wrapper(new Identifier(kind = "Unit"))
+      case n if n == null => new Wrapper(new Identifier(kind = "null"))
+
+      // General object
+      case o: AnyRef => wrapObj(o, name, cache)
+    }
+
+  /**
+   * Handles lists
+   */
+  private def wrapList(obj: List[_], kind: String, name: Option[String], cache: WrapperCache) = {
     val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
-    wrapper.fields = obj.toList.map(v => wrap(v, Some("value")))
+    wrapper.fields = obj.toList.map(v => wrap(v, Some("value"), cache))
     wrapper.updateIndices()
+    cache += obj -> wrapper
     wrapper
   }
 
+  /**
+   * Transforms basics/primitives to Wrappers
+   */
   private def wrapBasic(obj: Any, name: Option[String]) = {
     val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
-    new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+    val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+    wrapper
   }
 
-  private def wrapObj(obj: Any, name: Option[String]): Wrapper = {
+  /**
+   * Handles transforming generic objects to Wrappers
+   */
+  private def wrapObj(obj: AnyRef, name: Option[String], cache: WrapperCache): Wrapper = {
+
+    // First, try the custom handlers
+    for (handler <- handlers) {
+      val result = handler(obj)
+      if (result.isDefined) {
+        cache += obj -> result.get
+        return result.get
+      }
+    }
 
     // Wrap the object
     val kind = if (obj.getClass.getSimpleName == null) obj.getClass.getName else obj.getClass.getSimpleName
     val wrapper = new Wrapper(new Identifier(kind = Some(kind), name = name), obj)
+    cache += obj -> wrapper
 
     // Wrap the fields
     def wrapFields(_class: Class[_]): List[Either[(String, String), Wrapper]] = {
@@ -133,7 +181,7 @@ object Wrapper {
           if (isBasic(fieldObj))
             Left(f.getName -> fieldObj.toString)
           else
-            Right(wrap(fieldObj, Some(f.getName)))
+            Right(wrap(fieldObj, Some(f.getName), cache))
         }) ++ wrapFields(_class.getSuperclass)
       }
     }
@@ -144,16 +192,24 @@ object Wrapper {
     wrapper
   }
 
-  private def wrapXml(node: Node): Option[Wrapper] = node match {
-    case t: Text => if (t.text.trim.isEmpty) None else Some(wrap(t.text.trim))
+  /**
+   * Handles transforming XML to Wrapper
+   */
+  private def wrapXml(node: Node, cache: WrapperCache): Option[Wrapper] = node match {
+    case t: Text => {
+      val wrapper = if (t.text.trim.isEmpty) None else Some(wrap(t.text.trim))
+      wrapper.foreach(w => cache += node -> w)
+      wrapper
+    }
     case _ => {
       // Wrap the element
       val wrapper = new Wrapper(new Identifier(kind = Some(node.label)), node)
 
       // Wrap the properties and fields
       wrapper.id = wrapper.id.copy(properties = node.attributes.asAttrMap)
-      wrapper.fields = node.child.toList.map(wrapXml).filter(_.isDefined).map(_.get)
+      wrapper.fields = node.child.toList.map(n => wrapXml(n, cache)).filter(_.isDefined).map(_.get)
       wrapper.updateIndices()
+      cache += node -> wrapper
       Some(wrapper)
     }
   }

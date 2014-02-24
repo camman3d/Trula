@@ -25,7 +25,7 @@ case class Identifier(
     kind.map(_ == target.kind.getOrElse("")).getOrElse(true) &&
       name.map(_ == target.name.getOrElse("")).getOrElse(true) &&
       index.map(_ == target.index.getOrElse(-1)).getOrElse(true) &&
-      properties.forall(entry => entry._2 == target.properties(entry._1))
+      properties.forall(entry => entry._2 == target.properties.get(entry._1).getOrElse(""))
   }
 
   def updated(ref: Reference) = {

@@ -29,13 +29,8 @@ object BasicScreenReader {
       </body>
     </html>
 
-  val rules =
-    """
-      |p { @s String } -> p { :done = print(@s) }
-    """.stripMargin
-
   def main(args: Array[String]) {
-    val treeReducer = new TreeReducer(rules)
+    val treeReducer = new TreeReducer("p { @s String } -> p { :done = print(@s) }")
     treeReducer.addMethod("print", (s: String) => println(s))
     treeReducer.reduce(html)
   }

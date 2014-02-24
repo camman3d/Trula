@@ -37,7 +37,7 @@ class TestTreeReducer {
   def testNormalReduce3() {
     val a = Wrapper.wrap(new A(new B()))
     val treeReducer = new TreeReducer("A -> :result = foo(A)")
-    treeReducer.treeBuilder.add("foo", (a: A) => "Hello")
+    treeReducer.addMethod("foo", (a: A) => "Hello")
     val reduced = treeReducer.reduce(a)
     assertTrue(reduced.fields.size == 0)
     assertEquals("String", reduced.id.kind.get)

@@ -3,9 +3,11 @@ package com.joshmonson.trula.reducer
 import org.junit.Test
 import org.junit.Assert._
 import com.joshmonson.trula.reducer.wrapping.Wrapper
-import com.joshmonson.trula.reducer.support.{D, C, B, A}
+import com.joshmonson.trula.reducer.support._
 import com.joshmonson.trula.parser.ast.lh.Identifier
 import java.util
+import com.joshmonson.trula.parser.ast.lh.Identifier
+import scala.Some
 
 /**
  * Created with IntelliJ IDEA.
@@ -112,6 +114,18 @@ class TestWrapper {
     assertEquals("foo", wrapper.id.properties("id"))
     assertEquals("two", wrapper.fields(0).id.kind.get)
     assertEquals("three", wrapper.fields(1).id.kind.get)
+  }
+
+  @Test
+  def testWrapCycle() {
+    val e1 = E1(null)
+    val e2 = E2(e1)
+    e1.e2 = e2
+
+    val wrapper = Wrapper.wrap(e1)
+    assertEquals("E1", wrapper.id.kind.get)
+    assertEquals("E2", wrapper.fields(0).id.kind.get)
+    assertEquals("E1", wrapper.fields(0).fields(0).id.kind.get)
   }
 
 }

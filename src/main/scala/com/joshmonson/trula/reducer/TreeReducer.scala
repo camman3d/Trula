@@ -3,6 +3,7 @@ package com.joshmonson.trula.reducer
 import com.joshmonson.trula.parser.RuleParser
 import com.joshmonson.trula.reducer.wrapping.Wrapper
 import com.joshmonson.trula.reducer.core.{TreeBuilder, SubTreeFinder}
+import com.joshmonson.trula.lib.Library
 
 /**
  * The entry point for using Trula for tree reduction.
@@ -72,6 +73,14 @@ class TreeReducer(ruleText: String) {
       }
     }
     tree
+  }
+
+  // Methods
+
+  def use(libs: Library *) = {
+    for (lib <- libs)
+      lib.init(this)
+    this
   }
 
   def addMethod(n: String, f: () => Any) = treeBuilder.add(n, f)

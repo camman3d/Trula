@@ -69,10 +69,10 @@ class TestSubTreeFinder {
     val a = new Wrapper("A")
     a.fields = List(b1, b2, new Wrapper("D"))
 
-    val structure = RuleParser.parse("C >> A -> X").get(0).lh
+    val structure = RuleParser.parse("A >> C -> X").get(0).lh
     val store = SubTreeFinder.find(a, structure)
     assertTrue(store.get.data.size == 1)
-    assertEquals("A", store.get.data(0).id.kind.get)
+    assertEquals("C", store.get.data(0).id.kind.get)
   }
 
   @Test

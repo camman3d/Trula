@@ -2,6 +2,7 @@ package examples.html
 
 import com.joshmonson.trula.reducer.TreeReducer
 import scala.xml.Elem
+import com.joshmonson.trula.lib.{Save, Web}
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,9 +31,10 @@ object LinkExtractor {
     </html>
 
   def main(args: Array[String]) {
-    val treeReducer = new TreeReducer("a -> :done = save(a)")
-    treeReducer.addMethod("save", (a: Elem) => println("Found: " + a))
+    val treeReducer = new TreeReducer("a -> done = save(a)")
+    treeReducer.use(Save)
     treeReducer.reduce(html)
+    println(Save.saves)
   }
 
 }

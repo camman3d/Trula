@@ -33,7 +33,7 @@ object StructureMatcher {
    */
   def matches(obj: Wrapper, structure: LHStructure, history: List[Wrapper] = Nil): Boolean = {
     // If the object & its parentage matches
-    if (structure.id.identifies(obj.id) && matchParentage(obj.id.parentage, history)) {
+    if (structure.id.identifies(obj.id) && matchParentage(structure.id.parentage, history)) {
 
       // Clear previous marks
       obj.clear()
